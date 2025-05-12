@@ -1,0 +1,116 @@
+import {
+  Page,
+  Text,
+  Card,
+  BlockStack,
+  Layout,
+  Button,
+  TextField,
+  InlineStack,
+  Banner,
+} from "@shopify/polaris";
+import { json, type LoaderFunctionArgs } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
+import { authenticate } from "../shopify.server";
+
+export const loader = async ({ request, params }: LoaderFunctionArgs) => {
+  const { admin } = await authenticate.admin(request);
+  const ticketId = params.ticketId;
+
+  // Here you would typically fetch return details based on the ticket ID
+  // For now, we'll return mock data
+  return json({
+    ticketId,
+    returnDetails: {
+      orderId: "ORD43521",
+      customerName: "John Smith",
+      customerEmail: "john.smith@example.com",
+      product: "Premium Wireless Headphones",
+      sku: "WH-PRO-100",
+      status: "Pending",
+      date: "Aug 15, 2024",
+    },
+  });
+};
+
+export default function ReturnTicketPage() {
+  const { ticketId, returnDetails } = useLoaderData<typeof loader>();
+
+  return (
+    <Page
+      title="Return Request"
+      subtitle={`Ticket ID: ${ticketId}`}
+      backAction={{ content: "Returns", url: "/app/returns" }}
+    >
+      <BlockStack gap="400">
+        <Banner
+          title="Return Request Details"
+          tone="info"
+        >
+          <p>Please review the return request details below.</p>
+        </Banner>
+
+        <Layout>
+          <Layout.Section>
+            <Card>
+              <BlockStack gap="400">
+                <Text variant="headingMd" as="h2">Order Information</Text>
+                <InlineStack gap="400">
+                  <TextField
+                    label="Order ID"
+                    value={returnDetails.orderId}
+                    readOnly
+                    autoComplete="off"
+                  />
+                  <TextField
+                    label="Date"
+                    value={returnDetails.date}
+                    readOnly
+                    autoComplete="off"
+                  />
+                </InlineStack>
+
+                <Text variant="headingMd" as="h2">Customer Information</Text>
+                <InlineStack gap="400">
+                  <TextField
+                    label="Customer Name"
+                    value={returnDetails.customerName}
+                    readOnly
+                    autoComplete="off"
+                  />
+                  <TextField
+                    label="Customer Email"
+                    value={returnDetails.customerEmail}
+                    readOnly
+                    autoComplete="off"
+                  />
+                </InlineStack>
+
+                <Text variant="headingMd" as="h2">Product Information</Text>
+                <InlineStack gap="400">
+                  <TextField
+                    label="Product"
+                    value={returnDetails.product}
+                    readOnly
+                    autoComplete="off"
+                  />
+                  <TextField
+                    label="SKU"
+                    value={returnDetails.sku}
+                    readOnly
+                    autoComplete="off"
+                  />
+                </InlineStack>
+
+                <InlineStack gap="400" align="end">
+                  <Button tone="critical">Reject Return</Button>
+                  <Button tone="success">Approve Return</Button>
+                </InlineStack>
+              </BlockStack>
+            </Card>
+          </Layout.Section>
+        </Layout>
+      </BlockStack>
+    </Page>
+  );
+} 
